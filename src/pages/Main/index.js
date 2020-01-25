@@ -1,15 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, ImageBackground, TouchableOpacity, StyleSheet, ActivityIndicator} from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons'
+import { ImageBackground, ActivityIndicator, Alert } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import PropTypes from 'prop-types';
 import PokeCamera from '../../components/PokeCamera';
-import { Container, Display, Header, ButtonLarge, SmallButton } from './styles';
+import {
+  Container,
+  Display,
+  Header,
+  ButtonLarge,
+  SmallButton,
+  ViewButton,
+  CameraButton,
+} from './styles';
 import api from '../../services/api';
-import {pokenome} from '../../services/pokemon';
+import { pokenome } from '../../services/pokemon';
 
-export default function Main({navigation}) {
+export default function Main({ navigation }) {
   const [isCameraVisible, setIsCameraVisible] = useState(false);
   const [photo, setPhoto] = useState(null);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const onChangePhoto = newPhoto => {
     setPhoto(newPhoto);
@@ -20,70 +29,75 @@ export default function Main({navigation}) {
     setIsCameraVisible(false);
   };
 
-  useEffect(()=>{
-    if(photo !== null){
-      getPokemon()
+  useEffect(() => {
+    async function getPokemon() {
+      setLoading(true);
+      try {
+        const response = await api.post('', {
+          requests: [
+            {
+              image: {
+                content: photo,
+              },
+              features: [
+                {
+                  type: 'WEB_DETECTION',
+                },
+              ],
+            },
+          ],
+        });
+
+        const {
+          label,
+        } = response.data.responses[0].webDetection.bestGuessLabels[0];
+
+        const findPoke = pokenome.find(element =>
+          label.includes(element.toLowerCase()),
+        );
+
+        if (findPoke) {
+          navigation.navigate('Detail', { pokemon: findPoke });
+        } else {
+          Alert.alert('Oh não!', `Será que isso não é um(a) ${label}?`);
+        }
+      } catch (error) {
+        Alert.alert('Oh não!', 'Ocorreu um erro na requisição');
+      }
+
+      setLoading(false);
     }
-  },[photo])
-
-  
-  async function getPokemon(){
-    setLoading(true);
-    const response = await api.post('',{"requests": [{
-      "image": {
-          "content": photo
-      },
-      "features": [{
-          "type": "WEB_DETECTION"
-      }]
-  }]
-});
-  const { label } = response.data.responses[0].webDetection.bestGuessLabels[0]
-  isPokemon(label)
-  setLoading(false)
-  }
-
-  function isPokemon(name){
-   const findPoke =  pokenome.find(element =>name.includes(element.toLowerCase()))
-    navigation.navigate('Detail', {pokemon:findPoke})
-    console.log(findPoke)
-  }
+    if (photo !== null) {
+      getPokemon();
+    }
+  }, [navigation, photo]);
 
   return (
     <Container>
-    <Header>
-      <ButtonLarge></ButtonLarge>
-      <SmallButton color="#9B1113"></SmallButton>
-      <SmallButton color="#f1c40f"></SmallButton>
-      <SmallButton color="#16a085"></SmallButton>
-    </Header>
-    <Display>
+      <Header>
+        <ButtonLarge />
+        <SmallButton color="#9B1113" />
+        <SmallButton color="#f1c40f" />
+        <SmallButton color="#16a085" />
+      </Header>
+      <Display>
         <ImageBackground
-          style={{ width: "100%", height: "100%" }}
+          style={{ width: '100%', height: '100%' }}
           source={{ uri: `data:image/png;base64,${photo}` }}
         />
       </Display>
-      <View style={styles.buttons}>
-        <TouchableOpacity
-          style={styles.button}
+      <ViewButton>
+        <CameraButton
           onPress={() => {
             setIsCameraVisible(true);
-          }}
-        >
-          {loading ? <ActivityIndicator size="large" color="#0000ff" /> : <MaterialIcons name="camera-alt" size={40} color={"#f37272"} />}
-          
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            navigation.navigate('Detail', {pokemon:'findPoke'})
-          }}
-        >
-         <MaterialIcons name="home" size={40} color={"#f37272"} />
-          
-        </TouchableOpacity>
-        
-      </View>
+          }}>
+          {loading ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : (
+            <MaterialIcons name="camera-alt" size={40} color="#f37272" />
+          )}
+        </CameraButton>
+      </ViewButton>
       <PokeCamera
         isVisible={isCameraVisible}
         onChangePhoto={onChangePhoto}
@@ -93,31 +107,6 @@ export default function Main({navigation}) {
   );
 }
 
-const styles = StyleSheet.create({
-  logo: {
-    alignSelf: "center",
-    marginTop: 60
-  },
-  photo: {
-    width: 300,
-    height: 200,
-    backgroundColor: "#fff",
-    alignSelf: "center",
-    marginTop: 80,
-    borderColor:"#eded"
-  },
-  buttons: {
-    marginTop: 10,
-    flexDirection: "row",
-    justifyContent: "center"
-  },
-  button: {
-    backgroundColor: "#fff",
-    margin: 20,
-    borderRadius: 150,
-    width: 80,
-    height: 80,
-    alignItems: "center",
-    justifyContent: "center"
-  },
-});
+Main.propTypes = {
+  navigation: PropTypes.shape().isRequired,
+};

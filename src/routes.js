@@ -1,4 +1,3 @@
-
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import Main from './pages/Main';
@@ -6,14 +5,19 @@ import Detail from './pages/Detail';
 
 const Routes = createAppContainer(
   createStackNavigator({
-    Main:{
+    Main: {
       screen: Main,
-      navigationOptions:{
-        headerShown:false
-      }
+      navigationOptions: {
+        headerShown: false,
+      },
     },
-    Detail
-  })
+    Detail: {
+      screen: Detail,
+      navigationOptions: {
+        headerShown: false,
+      },
+    },
+  }),
 );
 
 export default Routes;

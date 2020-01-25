@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://vision.googleapis.com/v1/images:annotate?key=AIzaSyDuiBnkSrYOd1y6NgbrrVf2ADdQewTsipk',
+  baseURL:
+    'https://vision.googleapis.com/v1/images:annotate?key=SEU_TOKEN_AQUI',
 });
 
 export default api;
