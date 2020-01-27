@@ -1,7 +1,7 @@
 # Pokedex
 example of using the computer vision api of google vision.
 
-[![Pokedex](http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](https://www.youtube.com/watch?v=qR3VWy8TenQ&feature=youtu.be)
+[![Pokedex](https://media.giphy.com/media/JrwhEcn9F6nlFn7RRK/giphy.gif)
 
 ## Getting Started
 
